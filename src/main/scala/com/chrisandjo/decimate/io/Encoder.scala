@@ -11,17 +11,18 @@ import scala.sys.process.Process
  * Copyright (c) Chris Myers 2010
  */
 object Encoder {
-      def encode(fileName:String):IO[Unit] = {
+      def encode(fileName:String):IO[Stream[String]] = {
         val ffmpegIO  = IO {
-          Process("/usr/local/bin/ffmpeg -y -i "+fileName+" -vcodec libx264 -b:v 2000k -refs 3 -keyint_min 29 -x264opts trellis=0 -acodec libfaac -ar 44100 -ab 160k -s 1024x576 /tmp/out.mp4").lines_!
+          Process("/Users/grailsuser/decimate/ffmpeg.sh").lines_!
         }
 
 
-
-        ffmpegIO map { a : Stream[String] =>
-          a map {_.length} foreach(println)
+        val filteredOutput = ffmpegIO map { a : Stream[String] =>
+          a filter {_.startsWith("frame=")}
 
         }
+
+        filteredOutput
 
 
       }
