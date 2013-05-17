@@ -1,8 +1,5 @@
 package com.chrisandjo.decimate.io
 
-import scalaz._
-import effect._
-import scala.sys.process._
 
 object Main {
   def main(args: Array[String]) {
@@ -20,22 +17,6 @@ object Main {
     //    result.unsafePerformIO
 
 
-    val ffmpegIO: IO[ProcessIO] = IO {
-      val pb = Process("ffmpeg")
-
-      val pio = new ProcessIO(_ => (),
-        stdout => scala.io.Source.fromInputStream(stdout)
-                .getLines.foreach(println),
-        _ => ())
-      pb.run(pio)
-      pio
-    }
-
-    ffmpegIO map()
-
-    val result = ffmpegIO
-
-    println("Nothings happened yet, lets go!")
-    result.unsafePerformIO
+    Encoder.encode("/Users/chris/Development/skyvideo-encoderbot/test/resources/video/test-master.mov").unsafePerformIO
   }
 }
