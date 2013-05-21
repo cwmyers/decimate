@@ -3,8 +3,8 @@ package com.chrisandjo.decimate.io
 import scalaz._
 import Scalaz._
 import scalaz.effect.IO
-import java.io._
 import scala.sys.process.Process
+import java.io._
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,37 +24,37 @@ object Encoder {
     )
   }
 
-  def getCommand(ffmpegBin: String, videoFile:String)= s"$ffmpegBin $videoFile  '-vcodec libx264 -b:v 2000k -refs 3 -keyint_min 29 -x264opts trellis=0 -acodec libfaac -ar 44100 -ab 160k -s 1024x576' /tmp/out.mp4"
+  def getCommand(ffmpegBin: String,
+                 videoFile: String) = s"$ffmpegBin $videoFile  '-vcodec libx264 -s 1024x576' /tmp/out.mp4"
 
   def callFfmpeg(command: String): IO[Stream[String]] = IO {
     Process(command).lines_!
   }
 
-  def getStream(fileName: String): OptionT[IO,Stream[String]] = {
-    val a:OptionT[IO,String] = findFfmpeg map {getCommand(_, fileName)}
-    a map {Process(_).lines_!}
-  }
+  def getStream(fileName: String): OptionT[IO, Stream[String]] = {
+    val optionalCommand: OptionT[IO, String] = findFfmpeg map {
+      getCommand(_, fileName)
+    }
+    optionalCommand >>= {
+      command => callFfmpeg(command).liftM[OptionT]
+    }
 
-  //  = for {
-  //    ffmpegBin <- findFfmpeg
-  //    stream <- callFfmpeg(fileName, ffmpegBin)
-  //
-  //  } yield stream
+//    for {
+//      command <- optionalCommand
+//    } yield callFfmpeg(command).liftM[OptionT]
+  }
 
 
   def encode(fileName: String): IO[Unit] = {
-
-
-    val b = getStream(fileName) map {
-      a  =>
+//  IO {println ("hi") }
+    getStream(fileName) map {
+      a: Stream[String] =>
         a map {
           _.length
         } foreach (println)
 
-    }
-
-    b.getOrElse(Unit.box {println("nothing")})
-
-
+    } getOrElse (Unit.box {
+      println("nothing")
+    })
   }
 }
