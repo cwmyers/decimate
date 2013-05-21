@@ -31,22 +31,14 @@ object Encoder {
     Process(command).lines_!
   }
 
-  def getStream(fileName: String): OptionT[IO, Stream[String]] = {
-    val optionalCommand: OptionT[IO, String] = findFfmpeg map {
-      getCommand(_, fileName)
-    }
-    optionalCommand >>= {
-      command => callFfmpeg(command).liftM[OptionT]
-    }
-
-//    for {
-//      command <- optionalCommand
-//    } yield callFfmpeg(command).liftM[OptionT]
-  }
+  def getStream(fileName: String): OptionT[IO, Stream[String]] = for {
+    command <- findFfmpeg map (getCommand(_, fileName))
+    stream <- callFfmpeg(command).liftM[OptionT]
+  } yield stream
 
 
   def encode(fileName: String): IO[Unit] = {
-//  IO {println ("hi") }
+    //  IO {println ("hi") }
     getStream(fileName) map {
       a: Stream[String] =>
         a map {
