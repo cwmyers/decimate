@@ -38,7 +38,6 @@ object Encoder {
 
 
   def encode(fileName: String): IO[Unit] = {
-    //  IO {println ("hi") }
     getStream(fileName) map {
       a: Stream[String] =>
         a map {
