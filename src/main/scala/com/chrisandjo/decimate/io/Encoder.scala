@@ -4,7 +4,7 @@ import scalaz._
 import Scalaz._
 import scalaz.effect.IO
 import scala.sys.process.Process
-import java.io._
+import FileFinder._
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,25 +15,17 @@ import java.io._
  */
 object Encoder {
 
-  def findFfmpeg: OptionT[IO, String] = {
-    OptionT[IO, String](IO {
-      List("/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg").find {
-        new File(_).exists
-      }
-    }
-    )
-  }
-
-  def getCommand(ffmpegBin: String,
-                 videoFile: String) = s"$ffmpegBin $videoFile  '-vcodec libx264 -s 1024x576' /tmp/out.mp4"
+  def getCommand(ffmpegWrapper: String, ffmpegBin: String,
+                 videoFile: String) = s"$ffmpegWrapper $ffmpegBin $videoFile  '-vcodec libx264 -s 1024x576' /tmp/out.mp4"
 
   def callFfmpeg(command: String): IO[Stream[String]] = IO {
     Process(command).lines_!
   }
 
   def getStream(fileName: String): OptionT[IO, Stream[String]] = for {
-    command <- findFfmpeg map (getCommand(_, fileName))
-    stream <- callFfmpeg(command).liftM[OptionT]
+    ffmpegBin <- OptionT[IO, String](findFfmpeg)
+    ffmpegWrapper <- OptionT[IO, String](findFfmpegWrapper)
+    stream <- callFfmpeg(getCommand(ffmpegWrapper, ffmpegBin, fileName)).liftM[OptionT]
   } yield stream
 
 
