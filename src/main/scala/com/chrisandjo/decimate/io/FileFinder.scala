@@ -15,5 +15,5 @@ object FileFinder {
 
   def findFfmpeg = findFile(List("/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"))
 
-  def findFfmpegWrapper = findFile(List("/Users/grailsuser/decimate/src/main/scripts/ffmpeg_wrapper.sh"))
+  def findFfmpegWrapper = findFile(List("/Users/grailsuser/decimate/src/main/scripts/ffmpeg_wrapper.sh","/Users/chris/Development/decimate/src/main/scripts/ffmpeg_wrapper.sh"))
 }
