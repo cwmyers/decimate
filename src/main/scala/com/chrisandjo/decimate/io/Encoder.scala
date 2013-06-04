@@ -29,15 +29,19 @@ object Encoder {
   } yield stream
 
 
-  def encode(fileName: String): IO[Unit] = {
-    getStream(fileName) map {
-      a: Stream[String] =>
-        a map {
-          _.length
-        } foreach (println)
+  def encode(fileName: String): ReaderWriterState[Config, List[String], Int, IO[Unit]] = {
+    ReaderWriterStateT {
+      case (r, s) => ( List("dfs"),
+        getStream(fileName) map {
+          a: Stream[String] =>
+            a map {
+              _.length
+            } foreach (println)
 
-    } getOrElse (Unit.box {
-      println("nothing")
-    })
+        } getOrElse (Unit.box {
+          println("nothing")
+        })
+        , s)
+    }
   }
 }
