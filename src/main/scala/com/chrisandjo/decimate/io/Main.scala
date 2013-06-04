@@ -1,6 +1,7 @@
 package com.chrisandjo.decimate.io
 
-import scalaz.Need
+import scalaz._
+import Scalaz._
 
 
 object Main {
