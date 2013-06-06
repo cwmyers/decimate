@@ -9,6 +9,6 @@ object Main {
 
 
     val config: Config = Config(ffmpegLocations = List("/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"))
-    val Need(logMessages) = Encoder.encode("/Users/chris/Development/skyvideo-encoderbot/test/resources/video/test-master.mov").run(config,0)
+    Encoder.encode("/Users/chris/Development/skyvideo-encoderbot/test/resources/video/test-master.mov")(config).unsafePerformIO()
   }
 }

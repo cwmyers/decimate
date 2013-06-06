@@ -22,26 +22,15 @@ object Encoder {
     Process(command).lines_!
   }
 
-  def getStream(fileName: String): OptionT[IO, Stream[String]] = for {
-    ffmpegBin <- OptionT[IO, String](findFfmpeg)
-    ffmpegWrapper <- OptionT[IO, String](findFfmpegWrapper)
+  def getStream(fileName: String, ffmpegBin: String): OptionT[IO, Stream[String]] = for {
+    ffmpegWrapper <- findFfmpegWrapper
     stream <- callFfmpeg(getCommand(ffmpegWrapper, ffmpegBin, fileName)).liftM[OptionT]
   } yield stream
 
 
-  def encode(fileName: String): ReaderWriterState[Config, List[String], Int, IO[Unit]] = {
-    ReaderWriterStateT {
-      case (r, s) => ( List("dfs"),
-        getStream(fileName) map {
-          a: Stream[String] =>
-            a map {
-              _.length
-            } foreach (println)
 
-        } getOrElse (Unit.box {
-          println("nothing")
-        })
-        , s)
-    }
-  }
+  def encode(fileName:String): Reader[Config,IO[Unit]] = for {
+    stream <- findFfmpeg >=> Reader { findFile(_) >>= {f => getStream(fileName, f)}}
+  } yield (stream map {_ foreach (println)} getOrElse (Unit.box {}))
+
 }
