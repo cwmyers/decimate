@@ -7,4 +7,4 @@ package com.chrisandjo.decimate.io
  * Time: 14:25
  * To change this template use File | Settings | File Templates.
  */
-case class Config(ffmpegLocations: List[String])
+case class Config(ffmpegLocations: List[String], ffmpegWrapperLocations: List[String])

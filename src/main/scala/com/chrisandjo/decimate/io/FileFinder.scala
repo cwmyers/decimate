@@ -16,5 +16,5 @@ object FileFinder {
 
   def findFfmpeg:Reader[Config, List[String]] = Reader {c=>c.ffmpegLocations}
 
-  def findFfmpegWrapper = findFile(List("/Users/grailsuser/decimate/src/main/scripts/ffmpeg_wrapper.sh","/Users/chris/Development/decimate/src/main/scripts/ffmpeg_wrapper.sh"))
+  def findFfmpegWrapper:Reader[Config, List[String]] = Reader {c=>c.ffmpegWrapperLocations}
 }
