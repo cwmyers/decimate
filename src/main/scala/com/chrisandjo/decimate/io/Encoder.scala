@@ -15,6 +15,9 @@ import FileFinder._
  */
 object Encoder {
 
+
+  type RO[A] = Reader[Config, IO[Option[A]]]
+
   def getCommand(ffmpegWrapper: String, ffmpegBin: String,
                  videoFile: String) = s"$ffmpegWrapper $ffmpegBin $videoFile  '-vcodec libx264 -s 1024x576' /tmp/out.mp4"
 
@@ -31,8 +34,8 @@ object Encoder {
 
 
   def encode(fileName:String): Reader[Config,IO[Unit]] = for {
-    ffmpegWrapper <- findFfmpegWrapper >=> Reader {findFile(_)}
-    ffmpegBin <- findFfmpeg >=> Reader { findFile(_) }
+    ffmpegWrapper <- findFfmpegWrapper
+    ffmpegBin <- findFfmpeg
   } yield (getStream(fileName, ffmpegBin, ffmpegWrapper) map ( _ foreach (println)) getOrElse (Unit.box {}))
 
 }

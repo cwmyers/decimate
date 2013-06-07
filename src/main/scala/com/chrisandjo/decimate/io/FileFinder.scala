@@ -14,7 +14,7 @@ import java.io.File
 object FileFinder {
   def findFile(path:List[String]): OptionT[IO,String] = OptionT[IO,String](IO{path.find(new File(_).exists)})
 
-  def findFfmpeg:Reader[Config, List[String]] = Reader {c=>c.ffmpegLocations}
+  def findFfmpeg:Reader[Config, OptionT[IO,String]] = Reader {c=>findFile(c.ffmpegLocations)}
 
-  def findFfmpegWrapper:Reader[Config, List[String]] = Reader {c=>c.ffmpegWrapperLocations}
+  def findFfmpegWrapper:Reader[Config, OptionT[IO,String]] = Reader {c=>findFile(c.ffmpegWrapperLocations)}
 }
