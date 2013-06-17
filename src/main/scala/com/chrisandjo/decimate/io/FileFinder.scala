@@ -2,6 +2,7 @@ package com.chrisandjo.decimate.io
 
 import scalaz._
 import scalaz.effect.IO
+import com.chrisandjo.decimate.types.Types._
 import java.io.File
 
 /**
@@ -14,7 +15,10 @@ import java.io.File
 object FileFinder {
   def findFile(path:List[String]): OptionT[IO,String] = OptionT[IO,String](IO{path.find(new File(_).exists)})
 
-  def findFfmpeg:Reader[Config, IO[Option[String]]] = Reader {c=>findFile(c.ffmpegLocations).run}
+  def findFfmpeg: ReaderT[OptionIO, Config, String] =
+    Kleisli[OptionIO, Config, String](c => findFile(c.ffmpegLocations))
 
-  def findFfmpegWrapper:Reader[Config, IO[Option[String]]] = Reader {c=>findFile(c.ffmpegWrapperLocations).run}
+  def findFfmpegWrapper: ReaderT[OptionIO, Config, String] =
+    Kleisli[OptionIO, Config, String](c => findFile(c.ffmpegWrapperLocations))
+
 }
