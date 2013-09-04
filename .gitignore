@@ -5,3 +5,6 @@ Thumbs.db
 
 # sbt
 target/
+project/project
+.idea
+.idea_modules
