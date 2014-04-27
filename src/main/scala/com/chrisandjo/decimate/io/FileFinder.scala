@@ -7,16 +7,16 @@ import scalaz.effect.IO
 import java.io.File
 
 object FileFinder {
-  def findFile(path: List[String]): EitherT[IO, String, String] =
-    EitherT[IO, String, String](IO {
+  def findFile(path: List[String @@ FilePath]): EitherT[IO, String, String @@ FilePath] =
+    EitherT[IO, String, String @@ FilePath](IO {
       path.find(new File(_).exists).toEither(s"File not found in $path")
     })
 
-  def findFfmpeg: ReaderT[EitherErrorIO, Config, String] =
-    Kleisli[EitherErrorIO, Config, String](c => findFile(c.ffmpegLocations))
+  def findFfmpeg = Kleisli[EitherErrorIO, Config, String @@ FilePath](c => findFile(c.ffmpegLocations))
 
-  def findFfmpegWrapper: ReaderT[EitherErrorIO, Config, String] =
-    Kleisli[EitherErrorIO, Config, String](c => findFile(c.ffmpegWrapperLocations))
+  def findFfmpegWrapper = Kleisli[EitherErrorIO, Config, String @@ FilePath](c => findFile(c.ffmpegWrapperLocations))
+
+  def findFfprobe =  Kleisli[EitherErrorIO, Config, String @@ FilePath](c => findFile(c.ffprobeLocations))
 
 
 }

@@ -23,6 +23,8 @@ package object decimate {
 
   type EitherIO[+E,+A] = EitherT[IO, E, A]
 
+  def EitherIO[E,A](i: IO[E\/A]):EitherIO[E,A] = EitherT[IO, E, A](i)
+
   type EitherErrorIO[+A]=EitherT[IO, String, A]
 
   implicit class OptionOps[A](opt: Option[A]) {
@@ -33,5 +35,9 @@ package object decimate {
     a.liftM[({type λ[α[+ _], b] = EitherT[α, String, b]})#λ]
       .liftReaderT[Config]
 
+  sealed trait FilePath
+  def FilePath[A](a: A): A @@ FilePath = Tag[A, FilePath](a)
+
+  type FilePaths = List[String @@ FilePath]
 
 }

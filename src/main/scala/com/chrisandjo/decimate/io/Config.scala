@@ -1,10 +1,12 @@
-package com.chrisandjo.decimate.io
+package com.chrisandjo
+package decimate
+package io
+
 
 /**
- * Created with IntelliJ IDEA.
- * User: grailsuser
- * Date: 04/06/2013
- * Time: 14:25
- * To change this template use File | Settings | File Templates.
+ * Copyright (c) Chris Myers 2014
  */
-case class Config(ffmpegLocations: List[String], ffmpegWrapperLocations: List[String])
+
+case class Config(ffmpegLocations: FilePaths,
+                  ffmpegWrapperLocations: FilePaths,
+                  ffprobeLocations: FilePaths)

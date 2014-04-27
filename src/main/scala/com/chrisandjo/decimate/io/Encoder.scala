@@ -2,29 +2,45 @@ package com.chrisandjo
 package decimate
 package io
 
-import scalaz._
+import scalaz._, Scalaz._
 import scalaz.effect.IO
 import scala.sys.process.Process
 import FileFinder._
 import scala.language.higherKinds
+import com.chrisandjo.decimate.time.Time
+import com.chrisandjo.decimate.time.Time.Seconds
 
 
 object Encoder {
 
-  def getCommand(ffmpegWrapper: String, ffmpegBin: String,
-                 videoFile: String) = s"$ffmpegWrapper $ffmpegBin $videoFile   /tmp/out.mp4"
+  def getCommand(ffmpegWrapper: String @@ FilePath,
+                 ffmpegBin: String @@ FilePath,
+                 videoFile: String @@ FilePath) =
+    Seq(ffmpegWrapper, ffmpegBin, videoFile.replaceAll(" ", "\\ "), "/tmp/out.mp4")
 
-  def callFfmpeg(command: String): IO[Stream[String]] = IO {
+  def executeCommand(command: Seq[String]): IO[Stream[String]] = IO {
     Process(command).lines_!
   }
 
-  def encode(fileName: String): ReaderT[EitherErrorIO, Config, Stream[String]] = for {
+
+  def encode(fileName: String @@ FilePath): ReaderT[EitherErrorIO, Config, Stream[String]] = for {
     ffmpegWrapper <- findFfmpegWrapper
     ffmpegBin <- findFfmpeg
-    stream <- liftReaderEitherIO(callFfmpeg(getCommand(ffmpegWrapper, ffmpegBin, fileName)))
-
+    stream <- liftReaderEitherIO(executeCommand(getCommand(ffmpegWrapper, ffmpegBin, fileName)))
   } yield stream
 
+  def getMetadata(fileName: String @@ FilePath): ReaderT[EitherErrorIO, Config, Double @@ Seconds] = for {
+    ffprobeBin <- findFfprobe
+    duration <- EitherIO[String, Double @@ Seconds](
+      executeCommand(Seq(ffprobeBin, fileName))
+        map getDuration).
+      liftReaderT[Config]
+  } yield duration
+
+
+  def getDuration(stream: Stream[String]): String \/ (Double @@ Seconds) = {
+    stream.filter(_.contains("Duration")).headOption.flatMap(Time.extractTime).toEither("Couldn't determine duration")
+  }
 
 }
 
