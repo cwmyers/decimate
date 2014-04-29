@@ -9,4 +9,5 @@ package io
 
 case class Config(ffmpegLocations: FilePaths,
                   ffmpegWrapperLocations: FilePaths,
-                  ffprobeLocations: FilePaths)
+                  ffprobeLocations: FilePaths,
+                  ffprobeWrapperLocations: FilePaths)

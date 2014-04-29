@@ -31,15 +31,16 @@ object Encoder {
 
   def getMetadata(fileName: String @@ FilePath): ReaderT[EitherErrorIO, Config, Double @@ Seconds] = for {
     ffprobeBin <- findFfprobe
-    duration <- EitherIO[String, Double @@ Seconds](
-      executeCommand(Seq(ffprobeBin, fileName))
+    ffprobeWrapper <- findFfprobeWrapper
+    duration <- EitherIO(
+      executeCommand(Seq(ffprobeWrapper, ffprobeBin, fileName))
         map getDuration).
       liftReaderT[Config]
   } yield duration
 
 
   def getDuration(stream: Stream[String]): String \/ (Double @@ Seconds) = {
-    stream.filter(_.contains("Duration")).headOption.flatMap(Time.extractTime).toEither("Couldn't determine duration")
+    stream.filter(_.contains("Duration")).headOption.flatMap(Time.extractTime) \/> "Couldn't determine duration"
   }
 
 }

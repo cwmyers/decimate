@@ -25,11 +25,9 @@ package object decimate {
 
   def EitherIO[E,A](i: IO[E\/A]):EitherIO[E,A] = EitherT[IO, E, A](i)
 
-  type EitherErrorIO[+A]=EitherT[IO, String, A]
+//  type EitherError[F[_],B]=({type λ[α[+ _], b] = EitherT[α, String, b]})#λ
 
-  implicit class OptionOps[A](opt: Option[A]) {
-    def toEither[E](error: E): \/[E, A] = \/.fromEither(opt.toRight(error))
-  }
+  type EitherErrorIO[+A]=EitherT[IO, String, A]
 
   def liftReaderEitherIO(a: IO[Stream[String]]): ReaderT[EitherErrorIO, Config, Stream[String]] =
     a.liftM[({type λ[α[+ _], b] = EitherT[α, String, b]})#λ]
