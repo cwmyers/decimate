@@ -3,13 +3,15 @@ package decimate
 package io
 
 import scalaz.effect._
-import IO._
 import scalaz._, Scalaz._
 import time.Time._
+import StreamProcessor._
 import scala.language.higherKinds
 
 
 object Main extends SafeApp {
+  type myProgram = IO[String \/ Reader[Config, (Double @@ Seconds, Stream[String])]]
+
 
   override def runl(args: List[String]) = {
 
@@ -25,15 +27,6 @@ object Main extends SafeApp {
 
     val fileName = FilePath("/Users/chris.myers/src/ruby-2.1.0/sample/trick2013/mame/music-box.mp4")
 
-    def processStream(duration: Double @@ Seconds, s: Stream[String]):Stream[String] =
-      s.filter(_.startsWith("frame")).
-        collect(Function.unlift(extractTime)).
-        map(t => (t / duration * 100).toInt).
-        map(p => s"$p%")
-
-
-    def processError = putStrLn _
-
     def printStream(s: Stream[String]) = IO {
       s.foreach(println)
     }
@@ -44,12 +37,9 @@ object Main extends SafeApp {
 
     val metaDataAndEncodeStream: ReaderT[EitherErrorIO, Config, (Double @@ Seconds, Stream[String])] = metaData tuple encode
 
-    val processedEffects: ReaderT[EitherErrorIO, Config, Stream[String]] = metaDataAndEncodeStream map {(processStream _).tupled}
-
-
+    val processedEffects: ReaderT[EitherErrorIO, Config, Stream[String]] = metaDataAndEncodeStream map (processStream _).tupled
 
     processedEffects(config).valueOr(Stream(_)) flatMap printStream
-
 
   }
 
