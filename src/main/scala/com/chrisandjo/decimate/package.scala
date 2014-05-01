@@ -19,13 +19,13 @@ package object decimate {
     def leibniz = Leibniz.refl
   }
 
+  type REIO[A] = ReaderT[EitherErrorIO, Config, A]
+
   type OptionIO[+A] = OptionT[IO, A]
 
   type EitherIO[+E,+A] = EitherT[IO, E, A]
 
   def EitherIO[E,A](i: IO[E\/A]):EitherIO[E,A] = EitherT[IO, E, A](i)
-
-//  type EitherError[F[_],B]=({type λ[α[+ _], b] = EitherT[α, String, b]})#λ
 
   type EitherErrorIO[+A]=EitherT[IO, String, A]
 

@@ -35,11 +35,9 @@ object Main extends SafeApp {
 
     val encode = Encoder.encode(fileName)
 
-    val metaDataAndEncodeStream: ReaderT[EitherErrorIO, Config, (Double @@ Seconds, Stream[String])] = metaData tuple encode
+    val processedStream = Apply[REIO].apply2(metaData,encode)(processStream)
 
-    val processedEffects: ReaderT[EitherErrorIO, Config, Stream[String]] = metaDataAndEncodeStream map (processStream _).tupled
-
-    processedEffects(config).valueOr(Stream(_)) flatMap printStream
+    processedStream(config).valueOr(Stream(_)) flatMap printStream
 
   }
 
