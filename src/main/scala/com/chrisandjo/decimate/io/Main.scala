@@ -33,9 +33,9 @@ object Main extends SafeApp {
 
     val metaData = Encoder.getMetadata(fileName)
 
-    val encode = Encoder.encode(fileName)
+    val encodingStream = Encoder.encode(fileName)
 
-    val processedStream = Apply[REIO].apply2(metaData,encode)(processStream)
+    val processedStream = Apply[REIO].apply2(metaData,encodingStream)(processStream)
 
     processedStream(config).valueOr(Stream(_)) flatMap printStream
 
