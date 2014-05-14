@@ -3,10 +3,12 @@ package decimate
 package io
 
 import scalaz.effect._
+import scalaz.effect.IO._
 import scalaz._, Scalaz._
 import time.Time._
 import StreamProcessor._
 import scala.language.higherKinds
+import com.chrisandjo.decimate.model.{ReportStatus, CleanUp, Actions, ReportError}
 
 
 object Main extends SafeApp {
@@ -31,13 +33,42 @@ object Main extends SafeApp {
       s.foreach(println)
     }
 
+
+    def handleStream2(s: Streams[String, IO[Unit]]): IO[Unit] = {
+      val progressEffects: IO[Unit] = printStream(s.progressStream)
+      s.completedStream.foldLeft(progressEffects)(_ mappend _)
+    }
+
+    def handleStream1(s: Stream[Actions]): IO[Unit] = {
+      val ioActions: Stream[IO[Unit]] = s.map {
+        case CleanUp => IO {
+          println("Cleaning up")
+        }
+        case ReportError(e) => IO {
+          println(s"There was an error $e")
+        }
+        case ReportStatus(status) => IO {
+          println(status)
+        }
+      }
+      ioActions.foldRight(ioUnit)(_ mappend _)
+    }
+
+    def handleStream(s: Stream[Actions]): IO[Unit] = IO {
+      s.foreach {
+        case CleanUp => println("Cleaning up")
+        case ReportError(e) => println(s"There was an error $e")
+        case ReportStatus(status) => println(status)
+      }
+    }
+
     val metaData = Encoder.getMetadata(fileName)
 
     val encodingStream = Encoder.encode(fileName)
 
-    val processedStream = Apply[REIO].apply2(metaData,encodingStream)(processStream)
+    val processedStream = Apply[REIO].apply2(metaData, encodingStream)(processStream)
 
-    processedStream(config).valueOr(Stream(_)) flatMap printStream
+    processedStream(config).valueOr(error => Stream(ReportError(error))) flatMap handleStream
 
   }
 
