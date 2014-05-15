@@ -19,7 +19,6 @@ object Encoder {
     Seq(ffmpegWrapper, ffmpegBin, videoFile.replaceAll(" ", "\\ "), "/tmp/out.mp4")
 
   def executeCommand(command: Seq[String]): IO[Stream[String]] = IO {
-//    println(s"Running command $command")
     Process(command).lines_!
   }
 
